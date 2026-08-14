@@ -16,6 +16,7 @@ import {
   createSecureToken,
   hashSecret,
   isPrintingJobStale,
+  isArchivableJobStatus,
   normalizeShopSlug,
   type PrintJobStatus,
 } from "./printKori";
@@ -427,7 +428,7 @@ export async function archiveOwnedJob(input: { ownerId: number; jobId: number })
     .where(and(eq(printJobs.id, input.jobId), eq(printJobs.shopId, shop.id), isNull(printJobs.archivedAt)))
     .limit(1);
   if (!job) throw new Error("Print job not found or already removed from history");
-  if (!(["Completed", "Failed", "Cancelled"] as const).includes(job.status as "Completed" | "Failed" | "Cancelled")) {
+  if (!isArchivableJobStatus(job.status as PrintJobStatus)) {
     throw new Error("Only Completed, Failed, or Cancelled jobs can be removed from history. Cancel active jobs first.");
   }
   await db.update(printJobs).set({ archivedAt: new Date() }).where(eq(printJobs.id, job.id));

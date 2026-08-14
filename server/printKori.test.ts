@@ -3,6 +3,7 @@ import {
   assertJobTransition,
   canAgentClaimJob,
   calculatePrintPriceCents,
+  isArchivableJobStatus,
   isPrintingJobStale,
   isAllowedJobTransition,
   normalizeShopSlug,
@@ -54,5 +55,13 @@ describe("PrintKori job rules", () => {
         now,
       }),
     ).toBe(false);
+  });
+
+  it("allows history removal only for terminal job states", () => {
+    expect(isArchivableJobStatus("Completed")).toBe(true);
+    expect(isArchivableJobStatus("Failed")).toBe(true);
+    expect(isArchivableJobStatus("Cancelled")).toBe(true);
+    expect(isArchivableJobStatus("Approved")).toBe(false);
+    expect(isArchivableJobStatus("Printing")).toBe(false);
   });
 });

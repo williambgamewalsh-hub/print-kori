@@ -77,6 +77,10 @@ export function canAgentClaimJob(activePrintingJobExists: boolean, candidateStat
   return !activePrintingJobExists && candidateStatus === "Approved";
 }
 
+export function isArchivableJobStatus(status: PrintJobStatus) {
+  return status === "Completed" || status === "Failed" || status === "Cancelled";
+}
+
 export function isPrintingJobStale({
   lastHeartbeatAt,
   startedPrintingAt,
