@@ -4,16 +4,29 @@ The Windows agent connects one approved PrintKori job at a time to the printer a
 
 ## First-time pairing
 
-1. In the dashboard, open **Agent pairing** and generate a one-time code.
-2. Copy the `agent` directory to the Windows printer computer.
-3. Run PowerShell and execute:
+1. In the dashboard, open **Agent pairing** and first download `PrintKoriAgent.ps1`.
+2. Copy the script to the Windows printer computer.
+3. Open PowerShell in the script folder and list the printers that the agent can see:
+
+   ```powershell
+   powershell -ExecutionPolicy Bypass -File .\PrintKoriAgent.ps1 -ListPrinters
+   ```
+
+4. Back in the dashboard, generate a one-time pairing code. Then run:
+
+   ```powershell
+   powershell -ExecutionPolicy Bypass -File .\PrintKoriAgent.ps1 -PairOnly
+   ```
+
+5. Enter the PrintKori site address and one-time code. The agent shows the detected printers and lets you choose one by number.
+6. The agent writes the selected printer and encrypted agent credentials to `%APPDATA%\PrintKoriAgent\agent.json`. Pairing-only mode exits after saving this configuration.
+7. Start the worker only after checking the selected printer:
 
    ```powershell
    powershell -ExecutionPolicy Bypass -File .\PrintKoriAgent.ps1
    ```
 
-4. Enter the deployed PrintKori site address, the one-time code, and the exact Windows printer name when prompted.
-5. The agent creates `%APPDATA%\PrintKoriAgent\agent.json` and starts polling. Keep the window open for the first test print.
+   Keep this first worker window visible while you submit and approve a small test PDF.
 
 ## Optional background startup
 

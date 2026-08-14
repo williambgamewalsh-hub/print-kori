@@ -138,6 +138,6 @@ function SummaryRow({ label, value }: { label: string; value: string }) {
   return <div className="flex items-start justify-between gap-4"><span className="text-zinc-400">{label}</span><span className="text-right font-bold">{value}</span></div>;
 }
 
-function formatMoney(cents: number, currency: string) {
-  return new Intl.NumberFormat(undefined, { style: "currency", currency, maximumFractionDigits: 2 }).format(cents / 100);
+function formatMoney(cents: number, _currency: string) {
+  return `${(cents / 100).toFixed(2)} Tk`;
 }

@@ -8,6 +8,9 @@ param(
   [string]$ApiBase,
   [string]$PairingCode,
   [string]$PrinterName,
+  [switch]$ListPrinters,
+  [switch]$PairOnly,
+  [switch]$Reconfigure,
   [switch]$InstallStartup,
   [switch]$RunOnce
 )
@@ -35,6 +38,20 @@ function Get-AvailablePrinters {
   return Get-CimInstance Win32_Printer | Where-Object { $_.WorkOffline -eq $false } | Select-Object -ExpandProperty Name
 }
 
+function Select-DetectedPrinter {
+  $printers = @(Get-AvailablePrinters)
+  if ($printers.Count -eq 0) { throw "No available Windows printer was found. Check that the printer is installed and online." }
+  Write-Host "Detected Windows printers:" -ForegroundColor Cyan
+  for ($index = 0; $index -lt $printers.Count; $index++) {
+    Write-Host " [$($index + 1)] $($printers[$index])"
+  }
+  do {
+    $choice = Read-Host "Choose a printer number"
+    $selectedIndex = 0
+  } while (-not [int]::TryParse($choice, [ref]$selectedIndex) -or $selectedIndex -lt 1 -or $selectedIndex -gt $printers.Count)
+  return $printers[$selectedIndex - 1]
+}
+
 function Invoke-AgentRequest([string]$path, [string]$method = "POST", $body = $null) {
   $headers = @{
     "x-printkori-agent-id" = [string]$script:AgentConfig.agentId
@@ -49,11 +66,7 @@ function Pair-Agent {
   if (-not $ApiBase) { $ApiBase = Read-Host "PrintKori API address (for example https://your-site.manus.space)" }
   if (-not $PairingCode) { $PairingCode = Read-Host "One-time pairing code from the PrintKori dashboard" }
   if (-not $PrinterName) {
-    $printers = Get-AvailablePrinters
-    if (-not $printers) { throw "No available Windows printer was found." }
-    Write-Host "Available printers:" -ForegroundColor Cyan
-    $printers | ForEach-Object { Write-Host " - $_" }
-    $PrinterName = Read-Host "Exact printer name"
+    $PrinterName = Select-DetectedPrinter
   }
   $body = @{ code = $PairingCode; deviceName = $env:COMPUTERNAME; selectedPrinter = $PrinterName } | ConvertTo-Json
   $response = Invoke-RestMethod -Uri "$($ApiBase.TrimEnd('/'))/api/agent/pair" -Method POST -ContentType "application/json" -Body $body
@@ -121,9 +134,21 @@ function Install-AgentStartup {
 }
 
 Ensure-AgentDirectories
+$availablePrinters = @(Get-AvailablePrinters)
+if ($ListPrinters) {
+  if ($availablePrinters.Count -eq 0) { Write-Host "No available Windows printers were detected." -ForegroundColor Yellow; exit 1 }
+  Write-Host "Detected Windows printers:" -ForegroundColor Cyan
+  $availablePrinters | ForEach-Object { Write-Host " - $_" }
+  exit 0
+}
 $script:AgentConfig = Get-AgentConfig
+if ($Reconfigure -and $null -ne $script:AgentConfig) {
+  Remove-Item $ConfigPath -Force
+  $script:AgentConfig = $null
+}
 if ($null -eq $script:AgentConfig) { $script:AgentConfig = Pair-Agent }
 if ($InstallStartup) { Install-AgentStartup }
+if ($PairOnly) { Write-Host "Pairing complete. Selected printer: $($script:AgentConfig.printerName)" -ForegroundColor Green; exit 0 }
 
 Write-Host "PrintKori agent is running for $($script:AgentConfig.printerName). Press Ctrl+C to stop this foreground session." -ForegroundColor Cyan
 do {

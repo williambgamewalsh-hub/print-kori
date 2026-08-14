@@ -15,4 +15,18 @@
 - [x] Apply the International Typographic Style visual system: white canvas, bold red square accents, black sans-serif typography, fine dividers, and asymmetric grid.
 - [x] Add Vitest coverage for pricing, job state transitions, agent claim behavior, and stale-job failure logic.
 - [ ] Complete browser-level validation of the dashboard and customer frontend at desktop and mobile widths. The code builds and type-checks, but the managed preview port is currently held by an unresponsive process.
-- [ ] Push the completed source code to the user-provided GitHub repository.
+- [x] Push the completed source code to the user-provided GitHub repository.
+- [x] Prepare and share a visual preview of the customer QR ordering flow and the shop owner dashboard.
+- [x] Restore the managed real-app preview or document the platform-level preview-port blocker after a final recovery attempt. The managed preview port 3000 remains occupied by an unresponsive process outside the application, so the independently verified interactive preview is the current review path.
+- [x] Complete production verification, save a release checkpoint, and prepare the site for the owner to publish. The production build, six Vitest checks, and TypeScript validation pass.
+- [ ] Activate the recurring stale-job monitor immediately after the owner publishes the site.
+- [x] Prepare local Windows test setup for the dashboard, temporary test-server agent API address, and real printer pairing before publication.
+- [x] Fix the local dashboard sign-in redirect loop that returns authenticated owners to the landing page instead of `/dashboard`.
+- [ ] Diagnose and reduce the slow temporary dashboard/login test experience.
+- [x] Add an editable shop settings return path so owners can correct setup choices after first-time setup.
+- [x] Make dashboard sidebar navigation scroll or route reliably to Jobs, QR code, Agent pairing, and settings.
+- [x] Make the Windows agent visible and testable in the dashboard with a clear download, pairing, and printer-discovery flow.
+- [x] Add Windows-agent printer discovery through the visible `-ListPrinters` command and numeric printer selection during pairing.
+- [x] Add clear job-history file-type thumbnails and an inspect-file action for faster print identification.
+- [x] Replace raw poisha setup inputs with decimal Bangladesh Taka (`0.00 Tk`) pricing inputs and displays.
+- [x] Allow shop owners to choose a local logo image file, upload it securely, preview it, and save it during setup or settings edits.

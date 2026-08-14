@@ -12,6 +12,7 @@ import {
   getPublicShop,
   getQuote,
   transitionOwnedJob,
+  uploadShopLogo,
 } from "./printShopService";
 
 const colorModeSchema = z.enum(["Color", "Grayscale"]);
@@ -69,6 +70,15 @@ export const appRouter = router({
       .input(z.object({ publicStatusToken: z.string().min(12).max(72) }))
       .query(({ input }) => getPublicJob(input.publicStatusToken)),
     ownerDashboard: protectedProcedure.query(({ ctx }) => getOwnerDashboard(ctx.user.id)),
+    uploadShopLogo: protectedProcedure
+      .input(
+        z.object({
+          fileName: z.string().min(1).max(255),
+          mimeType: z.enum(["image/png", "image/jpeg", "image/webp"]),
+          fileDataBase64: z.string().min(4).max(2_800_000),
+        }),
+      )
+      .mutation(({ ctx, input }) => uploadShopLogo({ ...input, ownerId: ctx.user.id, fileData: Buffer.from(input.fileDataBase64, "base64") })),
     completeSetup: protectedProcedure
       .input(
         z.object({

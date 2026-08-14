@@ -28,10 +28,11 @@ import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
 import { Button } from "./ui/button";
 
 const menuItems = [
-  { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
-  { icon: Printer, label: "Jobs", path: "/dashboard#jobs" },
-  { icon: QrCode, label: "QR code", path: "/dashboard#qr" },
-  { icon: Settings, label: "Agent pairing", path: "/dashboard#agent" },
+  { icon: LayoutDashboard, label: "Dashboard", sectionId: "dashboard-top" },
+  { icon: Printer, label: "Jobs", sectionId: "jobs" },
+  { icon: QrCode, label: "QR code", sectionId: "qr" },
+  { icon: Settings, label: "Agent pairing", sectionId: "agent" },
+  { icon: Settings, label: "Settings", sectionId: "settings" },
 ];
 
 const SIDEBAR_WIDTH_KEY = "sidebar-width";
@@ -71,7 +72,7 @@ export default function DashboardLayout({
             </p>
           </div>
           <Button
-            onClick={() => startLogin()}
+            onClick={() => startLogin("/dashboard")}
             size="lg"
             className="w-full shadow-lg hover:shadow-xl transition-all"
           >
@@ -108,11 +109,12 @@ function DashboardLayoutContent({
 }: DashboardLayoutContentProps) {
   const { user, logout } = useAuth();
   const [location, setLocation] = useLocation();
+  const [activeSection, setActiveSection] = useState("dashboard-top");
   const { state, toggleSidebar } = useSidebar();
   const isCollapsed = state === "collapsed";
   const [isResizing, setIsResizing] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
-  const activeMenuItem = menuItems.find(item => item.path === location);
+  const activeMenuItem = menuItems.find(item => item.sectionId === activeSection);
   const isMobile = useIsMobile();
 
   useEffect(() => {
@@ -181,12 +183,16 @@ function DashboardLayoutContent({
           <SidebarContent className="gap-0">
             <SidebarMenu className="px-2 py-1">
               {menuItems.map(item => {
-                const isActive = location === item.path;
+                const isActive = activeSection === item.sectionId;
                 return (
-                  <SidebarMenuItem key={item.path}>
+                  <SidebarMenuItem key={item.sectionId}>
                     <SidebarMenuButton
                       isActive={isActive}
-                      onClick={() => setLocation(item.path)}
+                      onClick={() => {
+                        setActiveSection(item.sectionId);
+                        if (location !== "/dashboard") setLocation("/dashboard");
+                        window.setTimeout(() => document.getElementById(item.sectionId)?.scrollIntoView({ behavior: "smooth", block: "start" }), 0);
+                      }}
                       tooltip={item.label}
                       className={`h-10 transition-all font-normal`}
                     >

@@ -63,6 +63,22 @@ export async function getPublicShop(slug: string) {
   };
 }
 
+export async function uploadShopLogo(input: {
+  ownerId: number;
+  fileName: string;
+  mimeType: string;
+  fileData: Buffer;
+}) {
+  const allowedTypes = new Set(["image/png", "image/jpeg", "image/webp"]);
+  if (!allowedTypes.has(input.mimeType)) throw new Error("Logo must be a PNG, JPG, or WebP image");
+  if (input.fileData.length === 0 || input.fileData.length > 2 * 1024 * 1024) {
+    throw new Error("Logo image must be smaller than 2 MB");
+  }
+  const extension = input.mimeType === "image/png" ? "png" : input.mimeType === "image/webp" ? "webp" : "jpg";
+  const uploaded = await storagePut(`shop-logos/${input.ownerId}/logo.${extension}`, input.fileData, input.mimeType);
+  return { url: uploaded.url };
+}
+
 export async function completeShopSetup(input: {
   ownerId: number;
   shopName: string;
@@ -279,13 +295,14 @@ export async function getOwnerDashboard(ownerId: number) {
   const db = await assertDb();
   const shop = await getOwnedShop(ownerId);
   if (!shop) return { shop: null, jobs: [], agents: [] };
-  const [jobs, agents, papers, staff] = await Promise.all([
+  const [jobs, agents, papers, staff, rates] = await Promise.all([
     db.select().from(printJobs).where(eq(printJobs.shopId, shop.id)).orderBy(desc(printJobs.createdAt)).limit(100),
     db.select().from(printAgents).where(eq(printAgents.shopId, shop.id)).orderBy(desc(printAgents.lastHeartbeatAt)),
     db.select().from(paperOptions).where(eq(paperOptions.shopId, shop.id)).orderBy(asc(paperOptions.sortOrder)),
     db.select().from(shopStaff).where(eq(shopStaff.shopId, shop.id)).orderBy(asc(shopStaff.accessRole)),
+    db.select().from(printRates).where(eq(printRates.shopId, shop.id)),
   ]);
-  return { shop, jobs, agents, papers, staff };
+  return { shop, jobs, agents, papers, staff, rates };
 }
 
 export async function transitionOwnedJob(input: {
