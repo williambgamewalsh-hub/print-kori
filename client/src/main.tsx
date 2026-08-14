@@ -6,6 +6,7 @@ import { createRoot } from "react-dom/client";
 import superjson from "superjson";
 import App from "./App";
 import { startLogin } from "./const";
+import { getOwnerLoginReturnPath, isOwnerOnlyRoute } from "./lib/authNavigation";
 import "./index.css";
 
 const queryClient = new QueryClient();
@@ -18,7 +19,8 @@ const redirectToLoginIfUnauthorized = (error: unknown) => {
 
   if (!isUnauthorized) return;
 
-  startLogin();
+  if (!isOwnerOnlyRoute(window.location.pathname)) return;
+  startLogin(getOwnerLoginReturnPath(window.location.pathname));
 };
 
 queryClient.getQueryCache().subscribe(event => {

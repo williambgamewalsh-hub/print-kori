@@ -11,18 +11,18 @@
 - [x] Implement a one-time-code print-agent pairing workflow and secure agent API for claiming only one Approved job at a time.
 - [x] Implement agent heartbeat, job progress, completion, and error reporting with exact job state transitions.
 - [x] Add owner alerts for newly submitted jobs and failed print jobs.
-- [ ] Add configurable stale-job monitoring through a platform-managed recurring heartbeat that marks abandoned Printing jobs as Failed. The authenticated callback is implemented; the schedule must be created after the owner publishes the site.
+- [x] Add configurable stale-job monitoring through a platform-managed recurring heartbeat that marks abandoned Printing jobs as Failed. The authenticated callback is implemented and the enabled production heartbeat was created after publication.
 - [x] Apply the International Typographic Style visual system: white canvas, bold red square accents, black sans-serif typography, fine dividers, and asymmetric grid.
 - [x] Add Vitest coverage for pricing, job state transitions, agent claim behavior, and stale-job failure logic.
-- [ ] Complete browser-level validation of the dashboard and customer frontend at desktop and mobile widths. The code builds and type-checks, but the managed preview port is currently held by an unresponsive process.
+- [ ] Verify the authenticated dashboard in-browser after real owner sign-in and document observable desktop and mobile evidence for dashboard loading, settings, jobs, QR, and agent-panel flows. The public landing has been checked; authenticated UI evidence is still needed.
 - [x] Push the completed source code to the user-provided GitHub repository.
 - [x] Prepare and share a visual preview of the customer QR ordering flow and the shop owner dashboard.
 - [x] Restore the managed real-app preview or document the platform-level preview-port blocker after a final recovery attempt. The managed preview recovered on port 3000 and the public landing page responds normally again.
 - [x] Complete production verification, save a release checkpoint, and prepare the site for the owner to publish. The production build, six Vitest checks, and TypeScript validation pass.
-- [ ] Activate the recurring stale-job monitor immediately after the owner publishes the site.
+- [x] After the owner publishes the site, create and verify the project-level `printkori-stale-print-jobs` heartbeat that POSTs to `/api/scheduled/stale-print-jobs` every five minutes. Task UID: `LLPJzUAmuBAsMYnGH4a2Eo`; it is enabled with the expected POST callback and cron expression.
 - [x] Prepare local Windows test setup for the dashboard, temporary test-server agent API address, and real printer pairing before publication.
 - [x] Fix the local dashboard sign-in redirect loop that returns authenticated owners to the landing page instead of `/dashboard`.
-- [ ] Validate post-login dashboard loading time after real owner authentication and confirm the slow test experience is resolved end-to-end. The public app now responds normally after recovering the stale server, but the owner sign-in flow needs real-account verification.
+- [ ] Observe and record the post-login dashboard load after real owner authentication to confirm whether the previously slow test experience is resolved. The public application and sign-in page now load normally, but authenticated timing evidence is still needed.
 - [x] Add an editable shop settings return path so owners can correct setup choices after first-time setup.
 - [x] Make dashboard sidebar navigation scroll or route reliably to Jobs, QR code, Agent pairing, and settings.
 - [x] Make the Windows agent visible and testable in the dashboard with a clear download, pairing, and printer-discovery flow.
@@ -48,3 +48,8 @@
 - [x] Polish the customer waiting and job-status interface for clarity, hierarchy, and mobile presentation.
 - [x] Add a dashboard Actions column with confirmed history removal for Completed, Failed, and Cancelled jobs.
 - [x] Protect Submitted, Pending, Approved, and Printing jobs from removal until they are safely cancelled or completed.
+- [x] Send the current managed preview URL to the owner and confirm they can open it from their browser. The owner reached the shared preview and reported the dashboard login behavior, confirming access.
+- [x] Diagnose and fix the reported recurring login loop that returns a signed-in owner to the PrintKori landing page instead of the dashboard in the current temporary preview. The landing button now preserves `/dashboard`, and the OAuth request was browser-checked with that return path.
+- [x] Expand the public landing page with featured PrintKori capabilities, a Why PrintKori value section, additional workflow/supporting content, and a professional responsive footer.
+- [x] Confirm that the published production domain has propagated the latest landing-page checkpoint. The production domain now serves the expanded landing page with the secondary hero action, featured sections, and footer.
+- [x] Increase the landing page’s section breathing room and refine internal vertical spacing so the expanded content does not feel compressed.
