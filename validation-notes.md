@@ -35,3 +35,7 @@ The featured, Why PrintKori, operating-flow, availability, setup, and footer ban
 ## Landing Page Motion Refinement
 
 The landing page now uses restrained reveal motion for lower content bands, a short staggered hero entrance, and tactile call-to-action hover feedback. Motion is limited to opacity and transform, with `prefers-reduced-motion` rendering the same content immediately without animation. Desktop and mobile visual checks confirmed that the revealed state remains legible and preserves the expanded spacing.
+
+## Landing Page Copy Edit Verification
+
+The hero actions now read **Get Started** and **See how it works**. Duplicate trailing number labels were removed from the three featured capability rows while retaining their primary left-side indices. The final desktop visual check confirmed that the revised copy and simplified labels fit the layout cleanly.

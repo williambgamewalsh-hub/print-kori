@@ -60,10 +60,10 @@ export default function Landing() {
             </p>
             <div className="motion-hero-actions mt-10 flex flex-wrap gap-3">
               <button className="red-action motion-action" onClick={() => startLogin("/dashboard")}>
-                Open shop dashboard <ArrowUpRight className="h-5 w-5" />
+                Get Started <ArrowUpRight className="h-5 w-5" />
               </button>
               <a href="#how-it-works" className="motion-outline inline-flex items-center gap-2 border border-black px-5 py-3 text-sm font-bold uppercase tracking-[0.12em] transition hover:bg-black hover:text-white">
-                See the flow <ArrowRight className="h-4 w-4" />
+                See how it works <ArrowRight className="h-4 w-4" />
               </a>
             </div>
           </div>
@@ -109,14 +109,13 @@ export default function Landing() {
             </p>
           </div>
           <div className="grid divide-y divide-white/20 border-y border-white/20">
-            {landingFeatures.map((feature, index) => (
+            {landingFeatures.map(feature => (
               <article key={feature.eyebrow} className="grid gap-5 py-10 sm:grid-cols-[70px_1fr_auto] sm:items-start sm:gap-8 lg:py-12">
                 <span className="font-mono text-sm text-[#ff5a4c]">{feature.eyebrow.split(" /")[0]}</span>
                 <div>
                   <p className="text-xl font-bold tracking-[-0.03em]">{feature.title}</p>
                   <p className="mt-3 max-w-xl leading-relaxed text-zinc-300">{feature.description}</p>
                 </div>
-                <span className="hidden text-sm font-bold text-white/50 sm:block">0{index + 1}</span>
               </article>
             ))}
           </div>
