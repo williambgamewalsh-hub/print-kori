@@ -31,3 +31,7 @@ The production dashboard entry was also rechecked. Its OAuth request carries `/d
 ## Landing Page Spacing Refinement
 
 The featured, Why PrintKori, operating-flow, availability, setup, and footer bands were given larger section padding and more relaxed internal spacing. Revised full-page desktop and mobile checks confirmed a clearer visual cadence, while retaining the sharp red, black, and white operational grid.
+
+## Landing Page Motion Refinement
+
+The landing page now uses restrained reveal motion for lower content bands, a short staggered hero entrance, and tactile call-to-action hover feedback. Motion is limited to opacity and transform, with `prefers-reduced-motion` rendering the same content immediately without animation. Desktop and mobile visual checks confirmed that the revealed state remains legible and preserves the expanded spacing.

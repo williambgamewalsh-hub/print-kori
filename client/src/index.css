@@ -101,3 +101,51 @@
   @media (min-width: 640px) { .container { padding-left: 1.5rem; padding-right: 1.5rem; } }
   @media (min-width: 1024px) { .container { padding-left: 2rem; padding-right: 2rem; max-width: 1280px; } }
 }
+
+@media (prefers-reduced-motion: no-preference) {
+  .landing-motion [data-reveal] {
+    opacity: 0;
+    transform: translateY(2rem);
+    transition: opacity 700ms cubic-bezier(0.23, 1, 0.32, 1), transform 700ms cubic-bezier(0.23, 1, 0.32, 1);
+    will-change: opacity, transform;
+  }
+
+  .landing-motion [data-reveal].is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .motion-hero-mark,
+  .motion-hero-title,
+  .motion-hero-copy,
+  .motion-hero-actions,
+  .motion-hero-qr {
+    animation: landing-rise 700ms cubic-bezier(0.23, 1, 0.32, 1) both;
+  }
+
+  .motion-hero-title { animation-delay: 70ms; }
+  .motion-hero-copy { animation-delay: 150ms; }
+  .motion-hero-actions { animation-delay: 220ms; }
+  .motion-hero-qr { animation-delay: 180ms; }
+
+  .motion-action,
+  .motion-outline {
+    transition: transform 180ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 180ms cubic-bezier(0.23, 1, 0.32, 1), background-color 180ms cubic-bezier(0.23, 1, 0.32, 1), color 180ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+
+  .motion-action:hover {
+    box-shadow: 5px 5px 0 #111111;
+    transform: translate(-2px, -2px);
+  }
+
+  .motion-outline:hover { transform: translateY(-2px); }
+
+  @keyframes landing-rise {
+    from { opacity: 0; transform: translateY(1.25rem); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-motion [data-reveal] { opacity: 1; transform: none; }
+}

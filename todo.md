@@ -53,3 +53,4 @@
 - [x] Expand the public landing page with featured PrintKori capabilities, a Why PrintKori value section, additional workflow/supporting content, and a professional responsive footer.
 - [x] Confirm that the published production domain has propagated the latest landing-page checkpoint. The production domain now serves the expanded landing page with the secondary hero action, featured sections, and footer.
 - [x] Increase the landing page’s section breathing room and refine internal vertical spacing so the expanded content does not feel compressed.
+- [x] Add subtle, accessible premium motion to the landing page through staged section reveals, polished interactive feedback, and reduced-motion support.

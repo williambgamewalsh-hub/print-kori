@@ -1,4 +1,5 @@
 import { startLogin } from "@/const";
+import { useEffect } from "react";
 import {
   ArrowRight,
   ArrowUpRight,
@@ -14,8 +15,31 @@ import {
 import { landingFeatures, landingPromises, landingWorkflow } from "./landingContent";
 
 export default function Landing() {
+  useEffect(() => {
+    const revealTargets = Array.from(document.querySelectorAll<HTMLElement>("[data-reveal]"));
+    if (!("IntersectionObserver" in window)) {
+      revealTargets.forEach(target => target.classList.add("is-visible"));
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("is-visible");
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.12, rootMargin: "0px 0px -56px" },
+    );
+
+    revealTargets.forEach(target => observer.observe(target));
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <main className="overflow-hidden bg-[#fbfbfa] text-[#111111]">
+    <main className="landing-motion overflow-hidden bg-[#fbfbfa] text-[#111111]">
       <section className="grid min-h-screen grid-cols-1 border-b border-black md:grid-cols-[1.2fr_0.8fr]">
         <div className="flex flex-col border-b border-black p-6 md:border-b-0 md:border-r md:p-10 lg:p-14">
           <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-[0.2em]">
@@ -23,22 +47,22 @@ export default function Landing() {
             <span>Cloud print operations</span>
           </div>
           <div className="my-auto py-20 md:py-0">
-            <div className="mb-8 h-10 w-10 bg-[#e32718]" />
-            <h1 className="max-w-4xl text-6xl font-black leading-[0.88] tracking-[-0.07em] sm:text-7xl lg:text-9xl">
+            <div className="motion-hero-mark mb-8 h-10 w-10 bg-[#e32718]" />
+            <h1 className="motion-hero-title max-w-4xl text-6xl font-black leading-[0.88] tracking-[-0.07em] sm:text-7xl lg:text-9xl">
               PRINT,
               <br />
               WITHOUT
               <br />
               FRICTION.
             </h1>
-            <p className="mt-10 max-w-xl text-lg leading-relaxed text-zinc-700">
+            <p className="motion-hero-copy mt-10 max-w-xl text-lg leading-relaxed text-zinc-700">
               A precise link between a customer’s phone, a shop’s counter, and its printer computer.
             </p>
-            <div className="mt-10 flex flex-wrap gap-3">
-              <button className="red-action" onClick={() => startLogin("/dashboard")}>
+            <div className="motion-hero-actions mt-10 flex flex-wrap gap-3">
+              <button className="red-action motion-action" onClick={() => startLogin("/dashboard")}>
                 Open shop dashboard <ArrowUpRight className="h-5 w-5" />
               </button>
-              <a href="#how-it-works" className="inline-flex items-center gap-2 border border-black px-5 py-3 text-sm font-bold uppercase tracking-[0.12em] transition hover:bg-black hover:text-white">
+              <a href="#how-it-works" className="motion-outline inline-flex items-center gap-2 border border-black px-5 py-3 text-sm font-bold uppercase tracking-[0.12em] transition hover:bg-black hover:text-white">
                 See the flow <ArrowRight className="h-4 w-4" />
               </a>
             </div>
@@ -50,7 +74,7 @@ export default function Landing() {
         <div className="grid grid-rows-[1fr_auto] bg-[#e32718] text-white">
           <div className="relative flex items-center justify-center overflow-hidden p-10">
             <div className="absolute left-0 top-0 h-24 w-24 border-b border-r border-black/20" />
-            <div className="grid h-64 w-64 grid-cols-7 gap-1.5 bg-white p-5 shadow-[12px_12px_0_#111] sm:h-80 sm:w-80">
+            <div className="motion-hero-qr grid h-64 w-64 grid-cols-7 gap-1.5 bg-white p-5 shadow-[12px_12px_0_#111] sm:h-80 sm:w-80">
               {Array.from({ length: 49 }).map((_, index) => {
                 const on = [0, 1, 2, 4, 6, 7, 8, 14, 16, 18, 20, 21, 22, 24, 25, 27, 29, 31, 32, 34, 35, 36, 38, 40, 42, 43, 44, 46, 48].includes(index);
                 return <span key={index} className={on ? "bg-black" : "bg-transparent"} />;
@@ -71,7 +95,7 @@ export default function Landing() {
         </div>
       </section>
 
-      <section className="border-b border-black bg-[#111111] px-6 py-28 text-white sm:px-10 sm:py-32 lg:px-16 lg:py-40">
+      <section data-reveal="true" className="border-b border-black bg-[#111111] px-6 py-28 text-white sm:px-10 sm:py-32 lg:px-16 lg:py-40">
         <div className="grid gap-16 lg:grid-cols-[0.72fr_1.28fr] lg:gap-28">
           <div>
             <div className="mb-6 flex items-center gap-3 text-xs font-bold uppercase tracking-[0.17em] text-[#ff5a4c]">
@@ -99,7 +123,7 @@ export default function Landing() {
         </div>
       </section>
 
-      <section className="grid border-b border-black lg:grid-cols-[1fr_1fr]" id="why-printkori">
+      <section data-reveal="true" className="grid border-b border-black lg:grid-cols-[1fr_1fr]" id="why-printkori">
         <div className="bg-[#e32718] p-8 text-white sm:p-14 lg:p-20">
           <p className="text-xs font-bold uppercase tracking-[0.17em]">Why PrintKori</p>
           <h2 className="mt-24 max-w-xl text-5xl font-black leading-[0.88] tracking-[-0.06em] sm:text-6xl">
@@ -123,7 +147,7 @@ export default function Landing() {
         </div>
       </section>
 
-      <section id="how-it-works" className="border-b border-black px-6 py-28 sm:px-10 sm:py-32 lg:px-16 lg:py-40">
+      <section data-reveal="true" id="how-it-works" className="border-b border-black px-6 py-28 sm:px-10 sm:py-32 lg:px-16 lg:py-40">
         <div className="flex flex-col justify-between gap-10 border-b border-black pb-12 md:flex-row md:items-end">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.17em] text-[#e32718]">The operating flow</p>
@@ -148,7 +172,7 @@ export default function Landing() {
         </div>
       </section>
 
-      <section className="grid border-b border-black lg:grid-cols-[0.9fr_1.1fr]">
+      <section data-reveal="true" className="grid border-b border-black lg:grid-cols-[0.9fr_1.1fr]">
         <div className="flex min-h-96 flex-col justify-between bg-[#f1efea] p-8 sm:p-14 lg:min-h-[34rem] lg:p-20">
           <div className="flex items-center gap-3 text-xs font-bold uppercase tracking-[0.17em]"><Printer className="h-4 w-4 text-[#e32718]" /> Ready when the printer is</div>
           <div>
@@ -160,13 +184,13 @@ export default function Landing() {
           <p className="text-xs font-bold uppercase tracking-[0.17em] text-[#ff5a4c]">Start with your shop</p>
           <h2 className="mt-20 max-w-xl text-5xl font-black leading-[0.88] tracking-[-0.06em] sm:text-6xl">YOUR QR. YOUR PRINTER. YOUR RULES.</h2>
           <p className="mt-9 max-w-xl leading-relaxed text-zinc-300">Set your name, logo, four core pricing rules, paper options, and staff access. PrintKori builds the shop flow around those choices.</p>
-          <button className="red-action mt-12" onClick={() => startLogin("/dashboard")}>
+          <button className="red-action motion-action mt-12" onClick={() => startLogin("/dashboard")}>
             Set up PrintKori <ArrowUpRight className="h-5 w-5" />
           </button>
         </div>
       </section>
 
-      <footer className="bg-[#111111] px-6 py-14 text-white md:px-10 md:py-16 lg:px-16 lg:py-20">
+      <footer data-reveal="true" className="bg-[#111111] px-6 py-14 text-white md:px-10 md:py-16 lg:px-16 lg:py-20">
         <div className="grid gap-12 border-b border-white/20 pb-12 md:grid-cols-[1fr_auto_auto] md:items-start">
           <div>
             <p className="text-2xl font-black tracking-[-0.05em]">PRINTKORI<span className="text-[#e32718]">.</span></p>
