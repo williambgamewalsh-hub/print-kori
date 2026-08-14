@@ -12,6 +12,10 @@ import {
   getPublicShop,
   getQuote,
   transitionOwnedJob,
+  updateShopPricing,
+  updateShopPaperOptions,
+  updateShopProfile,
+  updateShopStaff,
   uploadShopLogo,
 } from "./printShopService";
 
@@ -103,6 +107,18 @@ export const appRouter = router({
         }),
       )
       .mutation(({ ctx, input }) => completeShopSetup({ ownerId: ctx.user.id, ...input })),
+    updateProfile: protectedProcedure
+      .input(z.object({ shopName: z.string().min(3).max(160), logoUrl: z.string().max(768).nullable().optional() }))
+      .mutation(({ ctx, input }) => updateShopProfile({ ownerId: ctx.user.id, ...input })),
+    updatePricing: protectedProcedure
+      .input(z.object({ baseFeeCents: z.number().int().min(0).max(100000), staleJobTimeoutMinutes: z.number().int().min(1).max(1440), rates: z.array(z.object({ id: z.number().int().positive(), perPageCents: z.number().int().min(0).max(100000) })).min(1).max(48) }))
+      .mutation(({ ctx, input }) => updateShopPricing({ ownerId: ctx.user.id, ...input })),
+    updateStaff: protectedProcedure
+      .input(z.object({ staff: z.array(z.object({ name: z.string().min(1).max(160), email: z.string().email().max(320) })).max(20) }))
+      .mutation(({ ctx, input }) => updateShopStaff({ ownerId: ctx.user.id, ...input })),
+    updatePaperOptions: protectedProcedure
+      .input(z.object({ paperOptions: z.array(z.string().min(1).max(80)).min(1).max(12) }))
+      .mutation(({ ctx, input }) => updateShopPaperOptions({ ownerId: ctx.user.id, ...input })),
     transitionJob: protectedProcedure
       .input(z.object({ jobId: z.number().int().positive(), targetStatus: z.enum(["Approved", "Cancelled"]) }))
       .mutation(({ ctx, input }) => transitionOwnedJob({ ownerId: ctx.user.id, ...input })),

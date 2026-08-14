@@ -52,6 +52,9 @@ export async function getPublicShop(slug: string) {
     .from(paperOptions)
     .where(and(eq(paperOptions.shopId, shop.id), eq(paperOptions.isActive, true)))
     .orderBy(asc(paperOptions.sortOrder));
+  const agents = await db.select().from(printAgents).where(eq(printAgents.shopId, shop.id));
+  const onlineCutoff = Date.now() - 45_000;
+  const printerAvailable = agents.some(agent => agent.status === "Online" && agent.lastHeartbeatAt && agent.lastHeartbeatAt.getTime() >= onlineCutoff);
 
   return {
     id: shop.id,
@@ -60,6 +63,7 @@ export async function getPublicShop(slug: string) {
     logoUrl: shop.logoUrl,
     currency: shop.currency,
     papers,
+    printerAvailable,
   };
 }
 
@@ -77,6 +81,79 @@ export async function uploadShopLogo(input: {
   const extension = input.mimeType === "image/png" ? "png" : input.mimeType === "image/webp" ? "webp" : "jpg";
   const uploaded = await storagePut(`shop-logos/${input.ownerId}/logo.${extension}`, input.fileData, input.mimeType);
   return { url: uploaded.url };
+}
+
+export async function updateShopProfile(input: { ownerId: number; shopName: string; logoUrl?: string | null }) {
+  const db = await assertDb();
+  const shop = await getOwnedShop(input.ownerId);
+  if (!shop) throw new Error("Complete initial setup before editing shop settings");
+  const slug = normalizeShopSlug(input.shopName);
+  const [slugConflict] = await db.select({ id: shops.id }).from(shops).where(eq(shops.slug, slug)).limit(1);
+  if (slugConflict && slugConflict.id !== shop.id) throw new Error("That shop URL is already in use");
+  await db.update(shops).set({ name: input.shopName.trim(), slug, logoUrl: input.logoUrl ?? null }).where(eq(shops.id, shop.id));
+  return getOwnedShop(input.ownerId);
+}
+
+export async function updateShopPricing(input: {
+  ownerId: number;
+  baseFeeCents: number;
+  staleJobTimeoutMinutes: number;
+  rates: Array<{ id: number; perPageCents: number }>;
+}) {
+  const db = await assertDb();
+  const shop = await getOwnedShop(input.ownerId);
+  if (!shop) throw new Error("Complete initial setup before editing shop settings");
+  if (input.staleJobTimeoutMinutes < 1 || input.staleJobTimeoutMinutes > 1440) throw new Error("Stale-job timeout must be between 1 and 1440 minutes");
+  if (!Number.isInteger(input.baseFeeCents) || input.baseFeeCents < 0) throw new Error("Base fee must be zero or greater");
+  await db.update(shops).set({ baseFeeCents: input.baseFeeCents, staleJobTimeoutMinutes: input.staleJobTimeoutMinutes }).where(eq(shops.id, shop.id));
+  for (const rate of input.rates) {
+    if (!Number.isInteger(rate.perPageCents) || rate.perPageCents < 0) throw new Error("Print rates must be zero or greater");
+    await db.update(printRates).set({ perPageCents: rate.perPageCents }).where(and(eq(printRates.id, rate.id), eq(printRates.shopId, shop.id)));
+  }
+  return getOwnerDashboard(input.ownerId);
+}
+
+export async function updateShopStaff(input: { ownerId: number; staff: Array<{ name: string; email: string }> }) {
+  const db = await assertDb();
+  const shop = await getOwnedShop(input.ownerId);
+  if (!shop) throw new Error("Complete initial setup before editing shop settings");
+  await db.delete(shopStaff).where(and(eq(shopStaff.shopId, shop.id), eq(shopStaff.accessRole, "Staff")));
+  const staffRows = input.staff
+    .filter(member => member.name.trim() && member.email.trim())
+    .map(member => ({ shopId: shop.id, userId: null, name: member.name.trim(), email: member.email.trim().toLowerCase(), accessRole: "Staff" as const }));
+  if (staffRows.length) await db.insert(shopStaff).values(staffRows);
+  return getOwnerDashboard(input.ownerId);
+}
+
+export async function updateShopPaperOptions(input: { ownerId: number; paperOptions: string[] }) {
+  const db = await assertDb();
+  const shop = await getOwnedShop(input.ownerId);
+  if (!shop) throw new Error("Complete initial setup before editing shop settings");
+  const selectedNames = Array.from(new Set(input.paperOptions.map(name => name.trim()).filter(Boolean)));
+  if (!selectedNames.length) throw new Error("At least one paper option is required");
+  const currentPapers = await db.select().from(paperOptions).where(eq(paperOptions.shopId, shop.id)).orderBy(asc(paperOptions.sortOrder));
+  const currentRates = await db.select().from(printRates).where(eq(printRates.shopId, shop.id));
+  const fallbackRates = new Map(currentRates.map(rate => [`${rate.colorMode}:${rate.sides}`, rate.perPageCents]));
+  for (let sortOrder = 0; sortOrder < selectedNames.length; sortOrder += 1) {
+    const name = selectedNames[sortOrder]!;
+    const existing = currentPapers.find(paper => paper.name === name);
+    if (existing) {
+      await db.update(paperOptions).set({ isActive: true, sortOrder }).where(eq(paperOptions.id, existing.id));
+      continue;
+    }
+    const insert = await db.insert(paperOptions).values({ shopId: shop.id, name, sortOrder, isActive: true });
+    const paperOptionId = Number((insert as any)[0]?.insertId ?? (insert as any).insertId);
+    await db.insert(printRates).values([
+      { shopId: shop.id, paperOptionId, colorMode: "Grayscale", sides: "Single-sided", perPageCents: fallbackRates.get("Grayscale:Single-sided") ?? 0 },
+      { shopId: shop.id, paperOptionId, colorMode: "Grayscale", sides: "Double-sided", perPageCents: fallbackRates.get("Grayscale:Double-sided") ?? 0 },
+      { shopId: shop.id, paperOptionId, colorMode: "Color", sides: "Single-sided", perPageCents: fallbackRates.get("Color:Single-sided") ?? 0 },
+      { shopId: shop.id, paperOptionId, colorMode: "Color", sides: "Double-sided", perPageCents: fallbackRates.get("Color:Double-sided") ?? 0 },
+    ]);
+  }
+  for (const paper of currentPapers) {
+    if (!selectedNames.includes(paper.name)) await db.update(paperOptions).set({ isActive: false }).where(eq(paperOptions.id, paper.id));
+  }
+  return getOwnerDashboard(input.ownerId);
 }
 
 export async function completeShopSetup(input: {
@@ -235,6 +312,10 @@ export async function createCustomerPrintJob(input: {
   }
   const quote = await quoteForShop(input);
   const db = await assertDb();
+  const agents = await db.select().from(printAgents).where(eq(printAgents.shopId, quote.shop.id));
+  const onlineCutoff = Date.now() - 45_000;
+  const printerAvailable = agents.some(agent => agent.status === "Online" && agent.lastHeartbeatAt && agent.lastHeartbeatAt.getTime() >= onlineCutoff);
+  if (!printerAvailable) throw new Error("The shop printer is currently unavailable. Please try again later or speak with the counter.");
   const safeFileName = input.fileName.replace(/[^a-zA-Z0-9._-]/g, "-").slice(0, 180) || "print-file";
   const uploaded = await storagePut(`shops/${quote.shop.id}/jobs/${Date.now()}-${safeFileName}`, input.fileData, input.mimeType);
   const token = createSecureToken();
@@ -384,6 +465,13 @@ export async function authenticateAgent(agentId: number, agentSecret: string) {
   const [agent] = await db.select().from(printAgents).where(eq(printAgents.id, agentId)).limit(1);
   if (!agent || agent.agentSecretHash !== hashSecret(agentSecret)) throw new Error("Invalid print-agent credentials");
   return agent;
+}
+
+export async function recordAgentHeartbeat(agent: typeof printAgents.$inferSelect) {
+  const db = await assertDb();
+  const now = new Date();
+  await db.update(printAgents).set({ status: "Online", lastHeartbeatAt: now }).where(eq(printAgents.id, agent.id));
+  return { status: "Online" as const, lastHeartbeatAt: now };
 }
 
 export async function claimApprovedJobForAgent(agent: typeof printAgents.$inferSelect) {

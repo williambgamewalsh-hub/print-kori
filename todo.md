@@ -30,3 +30,19 @@
 - [x] Add clear job-history file-type thumbnails and an inspect-file action for faster print identification.
 - [x] Replace raw poisha setup inputs with decimal Bangladesh Taka (`0.00 Tk`) pricing inputs and displays.
 - [x] Allow shop owners to choose a local logo image file, upload it securely, preview it, and save it during setup or settings edits.
+- [x] Make the agent button download a clearly named `PrintKoriAgent.ps1` file rather than opening raw source code.
+- [x] Show a dashboard confirmation dialog after the agent download with the printer-listing, pairing, and first-worker steps.
+- [x] Provide a plain-language step-by-step Windows agent installation guide in the dashboard and agent documentation.
+- [x] Replace the onboarding-style edit flow with a professional Shop Settings workspace containing independent business profile, logo, pricing, paper options, staff, and agent settings sections.
+- [x] Replace the temporary alert after agent download with an in-app dashboard confirmation dialog using the supplied dialog components.
+- [x] Split Shop Settings into separate Business profile, Logo, Pricing, Paper options, Staff, and Agent settings sections with clear independent actions.
+- [x] Add pairing-management actions inside the Agent settings section and verify the `/settings` route behavior.
+- [x] Research the Windows PowerShell interaction and privilege model for a transparent interactive print agent.
+- [x] Replace the command-driven agent flow with an interactive terminal menu for setup, pairing, re-pairing, printer detection, status, test printing, and exit.
+- [x] Limit administrator prompts to explicit optional setup actions and document why they are needed.
+- [x] Simplify the dashboard agent onboarding to a single terminal-agent download and clear launch instruction.
+- [x] Replace obsolete `-ListPrinters` and `-PairOnly` dashboard agent-panel instructions with the new interactive menu sequence.
+- [x] Replace repeated per-paper price fields with one clean core pricing set for grayscale/color and single/double-sided printing.
+- [x] Return current agent/printer availability to the customer frontend and show a clear unavailable notice when no printer is ready.
+- [x] Prevent customer jobs from remaining in an unexplained waiting state when a shop has no paired online print agent.
+- [x] Polish the customer waiting and job-status interface for clarity, hierarchy, and mobile presentation.

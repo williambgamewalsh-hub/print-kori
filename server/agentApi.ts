@@ -3,6 +3,7 @@ import {
   authenticateAgent,
   claimApprovedJobForAgent,
   pairAgent,
+  recordAgentHeartbeat,
   reportAgentJob,
 } from "./printShopService";
 
@@ -60,6 +61,15 @@ export function registerPrintAgentApi(app: Express) {
           status: job.status,
         },
       });
+    } catch (error) {
+      return sendApiError(res, error);
+    }
+  });
+
+  app.post("/api/agent/ping", async (req, res) => {
+    try {
+      const agent = await verifiedAgent(req);
+      return res.json(await recordAgentHeartbeat(agent));
     } catch (error) {
       return sendApiError(res, error);
     }

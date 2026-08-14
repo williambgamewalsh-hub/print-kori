@@ -72,7 +72,7 @@ export default function DashboardLayout({
             </p>
           </div>
           <Button
-            onClick={() => startLogin("/dashboard")}
+            onClick={() => startLogin(window.location.pathname === "/settings" ? "/settings" : "/dashboard")}
             size="lg"
             className="w-full shadow-lg hover:shadow-xl transition-all"
           >
@@ -190,6 +190,10 @@ function DashboardLayoutContent({
                       isActive={isActive}
                       onClick={() => {
                         setActiveSection(item.sectionId);
+                        if (item.sectionId === "settings") {
+                          setLocation("/settings");
+                          return;
+                        }
                         if (location !== "/dashboard") setLocation("/dashboard");
                         window.setTimeout(() => document.getElementById(item.sectionId)?.scrollIntoView({ behavior: "smooth", block: "start" }), 0);
                       }}

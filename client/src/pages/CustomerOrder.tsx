@@ -1,6 +1,6 @@
 import { JobStatusMark } from "@/components/JobStatusMark";
 import { trpc } from "@/lib/trpc";
-import { ArrowLeft, ArrowRight, Check, FileUp, Loader2, Printer, ScanLine } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, CircleAlert, FileUp, Loader2, Printer, ScanLine } from "lucide-react";
 import { ChangeEvent, useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useRoute } from "wouter";
 import { toast } from "sonner";
@@ -98,6 +98,7 @@ export default function CustomerOrder() {
         <section className="border-b border-black p-5 sm:p-8 lg:border-b-0 lg:border-r lg:p-12">
           <Link href="/" className="mb-10 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.12em] text-zinc-600 hover:text-black"><ArrowLeft className="h-4 w-4" /> PrintKori</Link>
           <div className="mb-10 max-w-xl"><p className="kicker">01 / Upload and configure</p><h2 className="mt-3 text-4xl font-black leading-none tracking-[-0.06em] sm:text-5xl">SEND A FILE.<br />WE’LL QUEUE THE PRINT.</h2></div>
+          {!shop.printerAvailable && <div className="mb-8 border-2 border-[#e32718] bg-[#fff4f2] p-5"><div className="flex items-start gap-3"><CircleAlert className="mt-0.5 h-5 w-5 shrink-0 text-[#e32718]" /><div><p className="font-black uppercase tracking-[.08em]">Printing is temporarily unavailable</p><p className="mt-2 text-sm leading-relaxed text-zinc-700">This shop does not currently have an active printer connection. Please try again later or speak with the counter before uploading your file.</p></div></div></div>}
           <div className="grid gap-8">
             <label className="upload-zone">
               <input className="sr-only" type="file" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg" onChange={selectFile} />
@@ -121,8 +122,8 @@ export default function CustomerOrder() {
           <div className="sticky top-8"><p className="kicker text-zinc-400">02 / Price summary</p><div className="my-8 h-px bg-white/30" />
             <div className="space-y-4 text-sm"><SummaryRow label="Print" value={`${colorMode} · ${sides}`} /><SummaryRow label="Paper" value={quote.data?.paperName ?? "Select paper"} /><SummaryRow label="Volume" value={`${copies} copies × ${pageCount} pages`} /></div>
             <div className="my-8 border-y border-white/30 py-6"><p className="text-xs font-bold uppercase tracking-[0.12em] text-zinc-400">Estimated total</p><p className="mt-2 text-4xl font-black tracking-[-0.06em]">{quote.isLoading ? "…" : formatMoney(quote.data?.priceCents ?? 0, shop.currency)}</p></div>
-            <p className="mb-6 text-sm leading-relaxed text-zinc-300">Your request will remain <strong className="font-bold text-white">Pending</strong> until the shop confirms payment.</p>
-            <button className="w-full bg-[#e32718] px-4 py-4 text-sm font-black uppercase tracking-[0.12em] transition-transform active:scale-[.98] disabled:opacity-50" disabled={!file || submit.isPending || quote.isLoading} onClick={handleSubmit}>{submit.isPending ? <Loader2 className="mx-auto h-5 w-5 animate-spin" /> : <span className="inline-flex items-center gap-2">Send to shop <ArrowRight className="h-4 w-4" /></span>}</button>
+            <p className="mb-6 text-sm leading-relaxed text-zinc-300">{shop.printerAvailable ? <>Your request will remain <strong className="font-bold text-white">Pending</strong> until the shop confirms payment.</> : "Submission is paused while the shop printer is offline."}</p>
+            <button className="w-full bg-[#e32718] px-4 py-4 text-sm font-black uppercase tracking-[0.12em] transition-transform active:scale-[.98] disabled:opacity-50" disabled={!shop.printerAvailable || !file || submit.isPending || quote.isLoading} onClick={handleSubmit}>{submit.isPending ? <Loader2 className="mx-auto h-5 w-5 animate-spin" /> : <span className="inline-flex items-center gap-2">{shop.printerAvailable ? "Send to shop" : "Printer unavailable"}<ArrowRight className="h-4 w-4" /></span>}</button>
           </div>
         </aside>
       </div>

@@ -17,6 +17,7 @@ function Router() {
       <Route path={"/s/:slug"} component={CustomerOrder} />
       <Route path={"/status/:token"} component={CustomerJobStatus} />
       <Route path={"/dashboard"} component={DashboardHome} />
+      <Route path={"/settings"} component={DashboardHome} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

@@ -1,43 +1,35 @@
 # PrintKori Windows Agent
 
-The Windows agent connects one approved PrintKori job at a time to the printer attached to that computer. It is intentionally transparent: the shop owner pairs it with a one-time code, chooses the Windows printer, can view it in the dashboard, and can stop or remove it at any time.
+`PrintKoriAgent.ps1` is an interactive Windows terminal tool for the computer physically connected to the shop printer. It is deliberately visible during setup and prints only jobs that the shop dashboard has marked **Approved**.
 
-## First-time pairing
+## Start the agent menu
 
-1. In the dashboard, open **Agent pairing** and first download `PrintKoriAgent.ps1`.
-2. Copy the script to the Windows printer computer.
-3. Open PowerShell in the script folder and list the printers that the agent can see:
-
-   ```powershell
-   powershell -ExecutionPolicy Bypass -File .\PrintKoriAgent.ps1 -ListPrinters
-   ```
-
-4. Back in the dashboard, generate a one-time pairing code. Then run:
-
-   ```powershell
-   powershell -ExecutionPolicy Bypass -File .\PrintKoriAgent.ps1 -PairOnly
-   ```
-
-5. Enter the PrintKori site address and one-time code. The agent shows the detected printers and lets you choose one by number.
-6. The agent writes the selected printer and encrypted agent credentials to `%APPDATA%\PrintKoriAgent\agent.json`. Pairing-only mode exits after saving this configuration.
-7. Start the worker only after checking the selected printer:
-
-   ```powershell
-   powershell -ExecutionPolicy Bypass -File .\PrintKoriAgent.ps1
-   ```
-
-   Keep this first worker window visible while you submit and approve a small test PDF.
-
-## Optional background startup
-
-After confirming a successful test print, run the agent one time with the startup option:
+Copy `PrintKoriAgent.ps1` to the Windows printer computer. Open PowerShell in the folder containing the file and run:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\PrintKoriAgent.ps1 -InstallStartup
+powershell -ExecutionPolicy Bypass -File .\PrintKoriAgent.ps1
 ```
 
-This creates a clearly named **PrintKori Agent** task that starts at the current user’s Windows sign-in. It remains visible in Task Scheduler and can be disabled or removed by the shop owner.
+The black PowerShell screen opens a numbered menu. It shows whether the computer is paired and the selected printer.
 
-## Supported files
+| Option | Use it for |
+|---|---|
+| `1` | Detect installed Windows printers, including offline/default status. |
+| `2` | Pair this computer with the one-time code from the PrintKori dashboard. |
+| `3` | Re-pair or choose a different printer later. |
+| `4` | See the saved PrintKori address, selected printer, and printer readiness. |
+| `5` | Send a Windows test page to the selected printer. |
+| `6` | Start the worker that claims and prints only approved PrintKori jobs. |
+| `7` | Create an automatic startup task for the current Windows user; no administrator approval is requested. |
+| `8` | Optional system-wide startup. It clearly asks for confirmation and then Windows administrator approval. |
+| `0` | Exit the terminal tool. |
 
-The agent sends PDF and image files through Windows’ configured print handler. For `.doc` and `.docx`, the computer must have Microsoft Word installed because the agent uses Word’s local print command.
+## First-time setup
+
+First choose option `1` to check that Windows sees the printer. Then, in PrintKori dashboard, create a one-time pairing code. Choose option `2`, enter the PrintKori address and code, then select the printer number. Finally choose option `5` to print a Windows test page. Once that works, choose option `6` and approve a small PDF in PrintKori.
+
+## Privileges
+
+Printer discovery, pairing, re-pairing, status, test printing, and normal print work use the signed-in shop user and do not require administrator permission. The optional option `8` is the only menu choice that requests Windows elevation because it creates a system-wide high-privilege startup task. Prefer option `7` for normal shop use.
+
+See [`INSTALLATION_GUIDE.md`](INSTALLATION_GUIDE.md) for a screen-by-screen guide and [`RESEARCH_NOTES.md`](RESEARCH_NOTES.md) for the Windows design basis.
