@@ -174,6 +174,7 @@ export const printJobs = mysqlTable(
     cancelledAt: timestamp("cancelledAt"),
     failedAt: timestamp("failedAt"),
     failureReason: text("failureReason"),
+    archivedAt: timestamp("archivedAt"),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
     updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   },
@@ -182,6 +183,7 @@ export const printJobs = mysqlTable(
     index("print_jobs_shop_status_idx").on(table.shopId, table.status),
     index("print_jobs_agent_status_idx").on(table.claimedByAgentId, table.status),
     index("print_jobs_printing_heartbeat_idx").on(table.status, table.lastAgentHeartbeatAt),
+    index("print_jobs_shop_archived_idx").on(table.shopId, table.archivedAt),
   ],
 );
 

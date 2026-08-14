@@ -5,6 +5,7 @@ import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { z } from "zod";
 import {
   completeShopSetup,
+  archiveOwnedJob,
   createAgentPairingCode,
   createCustomerPrintJob,
   getOwnerDashboard,
@@ -122,6 +123,9 @@ export const appRouter = router({
     transitionJob: protectedProcedure
       .input(z.object({ jobId: z.number().int().positive(), targetStatus: z.enum(["Approved", "Cancelled"]) }))
       .mutation(({ ctx, input }) => transitionOwnedJob({ ownerId: ctx.user.id, ...input })),
+    archiveJob: protectedProcedure
+      .input(z.object({ jobId: z.number().int().positive() }))
+      .mutation(({ ctx, input }) => archiveOwnedJob({ ownerId: ctx.user.id, ...input })),
     createPairingCode: protectedProcedure.mutation(({ ctx }) => createAgentPairingCode(ctx.user.id)),
   }),
 });

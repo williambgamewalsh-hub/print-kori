@@ -46,3 +46,5 @@
 - [x] Return current agent/printer availability to the customer frontend and show a clear unavailable notice when no printer is ready.
 - [x] Prevent customer jobs from remaining in an unexplained waiting state when a shop has no paired online print agent.
 - [x] Polish the customer waiting and job-status interface for clarity, hierarchy, and mobile presentation.
+- [x] Add a dashboard Actions column with confirmed history removal for Completed, Failed, and Cancelled jobs.
+- [x] Protect Submitted, Pending, Approved, and Printing jobs from removal until they are safely cancelled or completed.

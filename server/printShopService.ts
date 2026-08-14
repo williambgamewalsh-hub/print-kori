@@ -377,7 +377,7 @@ export async function getOwnerDashboard(ownerId: number) {
   const shop = await getOwnedShop(ownerId);
   if (!shop) return { shop: null, jobs: [], agents: [] };
   const [jobs, agents, papers, staff, rates] = await Promise.all([
-    db.select().from(printJobs).where(eq(printJobs.shopId, shop.id)).orderBy(desc(printJobs.createdAt)).limit(100),
+    db.select().from(printJobs).where(and(eq(printJobs.shopId, shop.id), isNull(printJobs.archivedAt))).orderBy(desc(printJobs.createdAt)).limit(100),
     db.select().from(printAgents).where(eq(printAgents.shopId, shop.id)).orderBy(desc(printAgents.lastHeartbeatAt)),
     db.select().from(paperOptions).where(eq(paperOptions.shopId, shop.id)).orderBy(asc(paperOptions.sortOrder)),
     db.select().from(shopStaff).where(eq(shopStaff.shopId, shop.id)).orderBy(asc(shopStaff.accessRole)),
@@ -397,7 +397,7 @@ export async function transitionOwnedJob(input: {
   const [job] = await db
     .select()
     .from(printJobs)
-    .where(and(eq(printJobs.id, input.jobId), eq(printJobs.shopId, shop.id)))
+    .where(and(eq(printJobs.id, input.jobId), eq(printJobs.shopId, shop.id), isNull(printJobs.archivedAt)))
     .limit(1);
   if (!job) throw new Error("Print job not found");
   assertJobTransition(job.status as PrintJobStatus, input.targetStatus);
@@ -415,6 +415,23 @@ export async function transitionOwnedJob(input: {
     ...jobEvent(input.targetStatus, "Shop", input.targetStatus === "Approved" ? "Payment confirmed by shop" : "Cancelled by shop"),
   });
   return { jobId: job.id, status: input.targetStatus };
+}
+
+export async function archiveOwnedJob(input: { ownerId: number; jobId: number }) {
+  const db = await assertDb();
+  const shop = await getOwnedShop(input.ownerId);
+  if (!shop) throw new Error("Finish shop setup before managing jobs");
+  const [job] = await db
+    .select()
+    .from(printJobs)
+    .where(and(eq(printJobs.id, input.jobId), eq(printJobs.shopId, shop.id), isNull(printJobs.archivedAt)))
+    .limit(1);
+  if (!job) throw new Error("Print job not found or already removed from history");
+  if (!(["Completed", "Failed", "Cancelled"] as const).includes(job.status as "Completed" | "Failed" | "Cancelled")) {
+    throw new Error("Only Completed, Failed, or Cancelled jobs can be removed from history. Cancel active jobs first.");
+  }
+  await db.update(printJobs).set({ archivedAt: new Date() }).where(eq(printJobs.id, job.id));
+  return { jobId: job.id, archived: true as const };
 }
 
 export async function createAgentPairingCode(ownerId: number) {
